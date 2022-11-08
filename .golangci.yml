@@ -1,0 +1,16 @@
+linters-settings:
+  timeout: 5m
+  goimports:
+    local-prefixes: github.com/go-status/status
+  gomnd:
+    settings:
+      mnd:
+        checks: argument,case,condition,return
+  lll:
+    line-length: 80
+    tab-width: 2
+  misspell:
+    locale: US
+
+linters:
+  enable-all: true
