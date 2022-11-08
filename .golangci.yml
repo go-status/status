@@ -12,5 +12,9 @@ linters-settings:
   misspell:
     locale: US
 
+run:
+  skip-dirs:
+    - proto/
+
 linters:
   enable-all: true
