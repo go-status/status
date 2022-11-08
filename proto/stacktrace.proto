@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package go_status.status.proto;
+
+option go_package = "github.com/go-status/status/proto;stpb";
+
+// Stack trace.
+message StackTrace {
+  // Frame represents a call frame.
+  message Frame {
+    // File path.
+    string file = 1;
+
+    // Line number.
+    int32 line = 2;
+
+    // Function name.
+    string function = 3;
+
+    // The entry address of the function.
+    uint64 entry = 4;
+
+    // Program counter of the call frame.
+    uint64 program_counter = 5;
+  }
+
+  // Stack frames of the stack trace.
+  repeated Frame frames = 1;
+}
