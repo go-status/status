@@ -9,6 +9,8 @@ import (
 )
 
 func TestNew(t *testing.T) {
+	t.Parallel()
+
 	a := recursiveCall(5)
 	b := recursiveCall(10)
 
@@ -53,6 +55,8 @@ func TestNew(t *testing.T) {
 }
 
 func TestStackTrace_ToProto(t *testing.T) {
+	t.Parallel()
+
 	s := New().ToProto()
 	_, file, line, _ := runtime.Caller(0)
 

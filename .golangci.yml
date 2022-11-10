@@ -18,3 +18,23 @@ run:
 
 linters:
   enable-all: true
+  disable:
+    # Allow default values for struct members.
+    - exhaustruct
+    - exhaustivestruct
+    # Disable varnamelen because short variable names are often useful.
+    - varnamelen
+
+issues:
+  exclude-rules:
+    # Disable some linters for tests.
+    - path: '(.+)_test\.go'
+      linters:
+        # Tests are often lengthy.
+        - cyclop
+        # Some tests may need to access internal members.
+        - testpackage
+
+    # Proto messages may have underscores.
+    - text: "(StackTrace_Frame) contains underscore"
+      linters: [nosnakecase]
