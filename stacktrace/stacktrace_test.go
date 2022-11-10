@@ -12,23 +12,38 @@ func TestNew(t *testing.T) {
 	a := recursiveCall(5)
 	b := recursiveCall(10)
 	if len(b.pcs)-len(a.pcs) != 5 {
-		t.Fatalf("Unexpected depths of stack traces: %d and %d", len(a.pcs), len(b.pcs))
+		t.Fatalf(
+			"Unexpected depths of stack traces: %d and %d",
+			len(a.pcs), len(b.pcs))
 	}
-	for i, _ := range a.pcs {
-		if i < 6 {
+	for i := range a.pcs {
+		switch {
+		case i < 6:
 			if a.pcs[i] != b.pcs[i] {
-				t.Fatalf("Stack frames inside recursiveCall must be the same: a[%d] != b[%d]", i, i)
+				t.Fatalf(
+					"Stack frames inside recursiveCall must be the same: "+
+						"a[%d] != b[%d]",
+					i, i)
 			}
 			if i >= 2 && a.pcs[i] != a.pcs[i-1] {
-				t.Fatalf("Stack frames in recursiveCall must be repeated: a[%d] != a[%d]", i, i-1)
+				t.Fatalf(
+					"Stack frames in recursiveCall must be repeated: "+
+						"a[%d] != a[%d]",
+					i, i-1)
 			}
-		} else if i == 6 {
+		case i == 6:
 			if a.pcs[i] == b.pcs[i] {
-				t.Fatalf("Program counters at TestNew must be different, but: a[%d] == b[%d]", i, i)
+				t.Fatalf(
+					"Program counters at TestNew must be different, but: "+
+						"a[%d] == b[%d]",
+					i, i)
 			}
-		} else {
+		default:
 			if a.pcs[i] != b.pcs[i+5] {
-				t.Fatalf("Stack frames deeper than TestNew must be the same: a[%d] != b[%d]", i, i+5)
+				t.Fatalf(
+					"Stack frames deeper than TestNew must be the same: "+
+						"a[%d] != b[%d]",
+					i, i+5)
 			}
 		}
 	}
@@ -61,7 +76,7 @@ func BenchmarkNew_Baseline(b *testing.B) {
 	b.ResetTimer()
 	err := errors.New("test")
 	for i := 0; i < b.N; i++ {
-		errors.WithStack(err)
+		_ = errors.WithStack(err)
 	}
 }
 

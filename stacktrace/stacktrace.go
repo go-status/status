@@ -40,6 +40,7 @@ func New() StackTrace {
 			break
 		}
 	}
+
 	return result
 }
 
@@ -62,7 +63,7 @@ func (s StackTrace) ToProto() *stpb.StackTrace {
 		// NOTE: Due to the runtime.Callers spec, program counters stored in
 		// StackTrace are incremented by 1.  The decrement restores a true
 		// program counter.
-		pc = pc - 1
+		pc--
 		frame := &stpb.StackTrace_Frame{
 			File:           "unknown",
 			Function:       "unknown",
@@ -88,11 +89,11 @@ func (s StackTrace) ToProto() *stpb.StackTrace {
 func (s StackTrace) Format(f fmt.State, verb rune) {
 	switch verb {
 	case 's':
-		io.WriteString(f, ToString(s.ToProto(), false))
+		_, _ = io.WriteString(f, ToString(s.ToProto(), false))
 	case 'v':
-		io.WriteString(f, ToString(s.ToProto(), true))
+		_, _ = io.WriteString(f, ToString(s.ToProto(), true))
 	default:
-		io.WriteString(f, fmt.Sprintf("%%!%c(StackTrace)", verb))
+		_, _ = io.WriteString(f, fmt.Sprintf("%%!%c(StackTrace)", verb))
 	}
 }
 
