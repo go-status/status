@@ -20,8 +20,10 @@ type StackTrace struct {
 }
 
 // Ensure StackTrace implements Formatter and Stringer.
-var _ fmt.Formatter = StackTrace{}
-var _ fmt.Stringer = StackTrace{}
+var (
+	_ fmt.Formatter = StackTrace{}
+	_ fmt.Stringer  = StackTrace{}
+)
 
 // New returns the current stack trace.  Its first stack frame should identify
 // the caller of New.
