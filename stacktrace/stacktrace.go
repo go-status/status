@@ -61,11 +61,13 @@ func (s StackTrace) ToProto() *stpb.StackTrace {
 	}
 
 	result := &stpb.StackTrace{}
+
 	for _, pc := range s.pcs {
 		// NOTE: Due to the runtime.Callers spec, program counters stored in
 		// StackTrace are incremented by 1.  The decrement restores a true
 		// program counter.
 		pc--
+
 		frame := &stpb.StackTrace_Frame{
 			File:           "unknown",
 			Function:       "unknown",
@@ -79,8 +81,10 @@ func (s StackTrace) ToProto() *stpb.StackTrace {
 			frame.Function = fn.Name()
 			frame.Entry = uint64(fn.Entry())
 		}
+
 		result.Frames = append(result.GetFrames(), frame)
 	}
+
 	return result
 }
 
