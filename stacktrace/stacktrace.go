@@ -31,6 +31,7 @@ func New() StackTrace {
 	var result StackTrace
 	// NOTE: `buf` uses a constant size to avoid heap allocation.
 	var buf [128]uintptr
+
 	// NOTE: 2 represents the two stack frames: New and runtime.Callers.
 	for skip := 2; ; skip += len(buf) {
 		// Fetch callers and resize `pcs`.
@@ -68,11 +69,13 @@ func (s StackTrace) ToProto() *stpb.StackTrace {
 		// program counter.
 		pc--
 
+		// Set default values for unresolvable frames.
 		frame := &stpb.StackTrace_Frame{
 			File:           "unknown",
 			Function:       "unknown",
 			ProgramCounter: uint64(pc),
 		}
+
 		// Fill fields of the stack frame.
 		if fn := runtime.FuncForPC(pc); fn != nil {
 			file, line := fn.FileLine(pc)
