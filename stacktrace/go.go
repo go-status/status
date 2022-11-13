@@ -19,6 +19,9 @@ func Go(ctx context.Context, f func(context.Context)) {
 //nolint:gochecknoglobals
 var goEnterFuncName = func() string {
 	var name string
+
+	// Acquire a stack frame of goEnter and store the fully-qualified function
+	// name of goEnter to name.
 	goEnter(func() {
 		pc, _, _, _ := runtime.Caller(1)
 		details := runtime.FuncForPC(pc)
@@ -45,6 +48,10 @@ func goEnter(f func()) {
 	f()
 }
 
+// goExit is a wrapper function appeared in a stack trace.  This should be
+// used for marking an end of a go-routine.  Stack frames after this function
+// should be hidden.
+//
 //go:noinline
 func goExit(ctx context.Context) *StackTrace {
 	st := New(ctx)

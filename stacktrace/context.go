@@ -8,6 +8,8 @@ type contextStackTraceKeyType int
 // contextStackTraceKey is a context key for ContextStackTrace.
 const contextStackTraceKey contextStackTraceKeyType = 0
 
+// fromContext extracts a StackTrace object from the given context.  This
+// returns nil if it fails to find a StackTrace object.
 func fromContext(ctx context.Context) *StackTrace {
 	if ctx == nil {
 		return nil
@@ -22,6 +24,7 @@ func fromContext(ctx context.Context) *StackTrace {
 	return nil
 }
 
+// contextWith returns a new context with the given StackTrace object.
 func contextWith(ctx context.Context, st *StackTrace) context.Context {
 	return context.WithValue(ctx, contextStackTraceKey, st)
 }
