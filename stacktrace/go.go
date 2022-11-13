@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+// Go spawns a go routine calling f with contextual stack tracing.  While a
+// regular go routine discards stack frames of its caller, this saves the
+// caller's stack frames and provides them to a spawned go-routine via Context.
 func Go(ctx context.Context, f func(context.Context)) {
 	// Record the current stack trace.
 	st := goExit(ctx)
