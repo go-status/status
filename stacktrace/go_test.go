@@ -2,6 +2,7 @@ package stacktrace
 
 import (
 	"context"
+	"strings"
 	"sync"
 	"testing"
 )
@@ -22,5 +23,21 @@ func TestGo(t *testing.T) {
 	})
 
 	wg.Wait()
-	t.Errorf("%+v", st)
+
+	frames := st.ToProto().GetFrames()
+
+	for i, expected := range []string{
+		"/stacktrace.TestGo.func1",
+		"/stacktrace.Go.func1",
+		"/stacktrace.Go",
+		"/stacktrace.TestGo",
+	} {
+		if !strings.HasSuffix(
+			frames[i].GetFunction(), expected) {
+			t.Fatalf(
+				"Stack frame[%d] has an unexpected function: "+
+					"expected=*%s, actual=%s",
+				i, expected, frames[i].GetFunction())
+		}
+	}
 }
