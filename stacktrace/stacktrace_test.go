@@ -1,6 +1,7 @@
 package stacktrace
 
 import (
+	"context"
 	"runtime"
 	"strings"
 	"testing"
@@ -57,12 +58,13 @@ func TestNew(t *testing.T) {
 func TestStackTrace_ToProto(t *testing.T) {
 	t.Parallel()
 
-	s := New().ToProto()
+	st := New(context.Background())
+	s := st.ToProto()
 	_, file, line, _ := runtime.Caller(0)
 
 	f := s.GetFrames()[0]
 
-	if actual, expected := f.GetLine(), int32(line-1); actual != expected {
+	if actual, expected := f.GetLine(), int32(line-2); actual != expected {
 		t.Fatalf("Unexpected line number: expected=%d, actual=%v", expected, f)
 	}
 
@@ -77,7 +79,7 @@ func TestStackTrace_ToProto(t *testing.T) {
 
 func recursiveCall(depth int) StackTrace {
 	if depth <= 0 {
-		return New()
+		return New(context.Background())
 	}
 
 	return recursiveCall(depth - 1)
@@ -96,8 +98,10 @@ func BenchmarkNew_Baseline(b *testing.B) {
 func BenchmarkNew(b *testing.B) {
 	b.ResetTimer()
 
+	ctx := context.Background()
+
 	for i := 0; i < b.N; i++ {
-		New()
+		New(ctx)
 	}
 }
 
