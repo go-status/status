@@ -1,6 +1,7 @@
 package stacktrace
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"runtime"
@@ -11,24 +12,29 @@ import (
 // StackTrace stores a stack trace with little overhead.
 type StackTrace struct {
 	// A stack trace converted from a Protocol Buffers message.
+	// CAVEAT: If proto is not nil, prev must be nil because proto should
+	// squash stack frames.
 	proto *stpb.StackTrace
 
 	// A stack trace generated internally.
 	// CAVEAT: The program counters are incremented by one due to the spec of
 	// runtime.Callers.  Please do not depend on the implementation.
 	pcs []uintptr
+
+	prev *StackTrace
 }
 
 // Ensure StackTrace implements Formatter and Stringer.
 var (
-	_ fmt.Formatter = StackTrace{}
-	_ fmt.Stringer  = StackTrace{}
+	_ fmt.Formatter = &StackTrace{}
+	_ fmt.Stringer  = &StackTrace{}
 )
 
 // New returns the current stack trace.  Its first stack frame should identify
 // the caller of New.
-func New() StackTrace {
-	var result StackTrace
+func New(ctx context.Context) StackTrace {
+	result := StackTrace{prev: fromContext(ctx)}
+
 	// NOTE: `buf` uses a constant size to avoid heap allocation.
 	var buf [128]uintptr
 
@@ -56,12 +62,30 @@ func NewFromProto(s *stpb.StackTrace) StackTrace {
 // ToProto converts the StackTrace object consisting of program counters to
 // a proto message having comprehensible stack frames (e.g., including function
 // names).
-func (s StackTrace) ToProto() *stpb.StackTrace {
+func (s *StackTrace) ToProto() *stpb.StackTrace {
 	if s.proto != nil {
 		return s.proto
 	}
 
 	result := &stpb.StackTrace{}
+
+	s.appendTo(result)
+
+	return result
+}
+
+// ToProto converts the StackTrace object consisting of program counters to
+// a proto message having comprehensible stack frames (e.g., including function
+// names).
+func (s *StackTrace) appendTo(st *stpb.StackTrace) {
+	if s.proto != nil {
+		st.Frames = append(st.GetFrames(), s.proto.GetFrames()...)
+
+		return
+	}
+
+	// Record the current number of frames.
+	numFrames := len(st.GetFrames())
 
 	for _, pc := range s.pcs {
 		// NOTE: Due to the runtime.Callers spec, program counters stored in
@@ -83,19 +107,35 @@ func (s StackTrace) ToProto() *stpb.StackTrace {
 			frame.Line = int32(line)
 			frame.Function = fn.Name()
 			frame.Entry = uint64(fn.Entry())
+
+			// Discard remaining stack frames because goEnter should be
+			// treated as an entry point of a go-routine.
+			if fn.Name() == goEnterFuncName {
+				break
+			}
+
+			// Discard extra stack frames because goExit is a mark to stop
+			// recording stack frames.
+			if fn.Name() == goExitFuncName {
+				st.Frames = st.GetFrames()[:numFrames]
+
+				continue
+			}
 		}
 
-		result.Frames = append(result.GetFrames(), frame)
+		st.Frames = append(st.GetFrames(), frame)
 	}
 
-	return result
+	if s.prev != nil {
+		s.prev.appendTo(st)
+	}
 }
 
 // Format implements fmt.Formatter.  It outputs a stack trace in a
 // human-readable format using ToString. The format may change, so callers must
 // not depend on it.  "%s" outputs the stack trace in a short format, and "%v"
 // outputs the stack trace in a long format.
-func (s StackTrace) Format(f fmt.State, verb rune) {
+func (s *StackTrace) Format(f fmt.State, verb rune) {
 	switch verb {
 	case 's':
 		_, _ = io.WriteString(f, ToString(s.ToProto(), false))
@@ -108,6 +148,6 @@ func (s StackTrace) Format(f fmt.State, verb rune) {
 
 // String implements fmt.Stringer.  It returns the same format as ToString
 // returns where verbose is set to false.
-func (s StackTrace) String() string {
+func (s *StackTrace) String() string {
 	return ToString(s.ToProto(), false)
 }
