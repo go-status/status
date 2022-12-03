@@ -36,28 +36,29 @@ var goEnterFuncName = func() string {
 	return name
 }()
 
-// goExitFuncName is a fully-qualified function name of goExit.
+// goExitFuncName is the fully-qualified function name of goExit.
 //
 //nolint:gochecknoglobals
 var goExitFuncName = strings.ReplaceAll(
 	goEnterFuncName, "goEnter", "goExit")
 
-// goEnter is a wrapper function appeared in a stack trace.  This should be
-// used for marking an entry point of a go-routine.  Stack frames before this
-// function should be hidden.
+// goEnter is a wrapper function that appears in a stack trace.  It is used to
+// mark the entry point of a go-routine, and to hide stack frames before this
+// function.
 //
 //go:noinline
 func goEnter(f func()) {
 	f()
 }
 
-// goExit is a wrapper function appeared in a stack trace.  This should be
-// used for marking an end of a go-routine.  Stack frames after this function
-// should be hidden.
+// goExit is a wrapper function that appears in a stack trace.  It is used to
+// mark the end of a go-routine, and to hide stack frames after this function.
 //
 //go:noinline
 func goExit(ctx context.Context) *StackTrace {
+	// Create a new stack trace with the given context.
 	st := New(ctx)
 
+	// Return the new stack trace.
 	return &st
 }
