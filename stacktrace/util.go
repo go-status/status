@@ -9,11 +9,13 @@ import (
 	stpb "github.com/go-status/status/proto"
 )
 
-// ToString returns a string describing a stack trace in a human-readable
-// format.  The format may change, so callers must not depend on it.  If
-// verbose is enabled, a stack frame contains a fully qualified function name
-// and a full path (e.g., "path/to/pkg.Func@/path/to/format.go:123").
-// Otherwise, a stack frame contains short names (e.g., "Func@format.go:123").
+// ToString returns a string describing the stack trace in a human-readable
+// format.  The format may change, so callers should not depend on it.  If the
+// `verbose` flag is enabled, a stack frame will contain a fully qualified
+// function name and a full path (e.g.,
+// "path/to/pkg.Func@/path/to/format.go:123").
+// Otherwise, a stack frame will contain short names (e.g.,
+// "Func@format.go:123").
 func ToString(s *stpb.StackTrace, verbose bool) string {
 	// If no frames exist, returns "No stack trace" for better readability.
 	if len(s.GetFrames()) == 0 {

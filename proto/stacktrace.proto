@@ -4,26 +4,44 @@ package go_status.status.proto;
 
 option go_package = "github.com/go-status/status/proto;stpb";
 
-// Stack trace.
+// StackTrace represents a stack trace of a program.
 message StackTrace {
-  // Frame represents a call frame.
+  // Frame represents a call frame in the stack trace.
   message Frame {
-    // File path.
-    string file = 1;
+    // Type represents the type of the frame.
+    enum Type {
+      // Unknown type
+      TYPE_UNKNOWN = 0;
 
-    // Line number.
-    int32 line = 2;
+      // Stack frame
+      TYPE_STACK_FRAME = 1;
 
-    // Function name.
-    string function = 3;
+      // Go routine
+      TYPE_GO_ROUTINE = 2;
 
-    // The entry address of the function.
-    uint64 entry = 4;
+      // RPC call
+      TYPE_RPC_CALL = 3;
+    }
+    // Type of the frame.
+    Type type = 1;
 
-    // Program counter of the call frame.
-    uint64 program_counter = 5;
+    // File is the path to the source file containing the function.
+    string file = 2;
+
+    // Line is the line number in the source file where the function is
+    // defined.
+    int32 line = 3;
+
+    // Function is the name of the function being called.
+    string function = 4;
+
+    // Entry is the entry address of the function in memory.
+    uint64 entry = 5;
+
+    // ProgramCounter is the program counter of the call frame.
+    uint64 program_counter = 6;
   }
 
-  // Stack frames of the stack trace.
+  // Frames is a list of frames in the stack trace.
   repeated Frame frames = 1;
 }
