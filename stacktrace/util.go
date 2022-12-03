@@ -10,19 +10,19 @@ import (
 )
 
 // ToString returns a string describing the stack trace in a human-readable
-// format.  The format may change, so callers should not depend on it.  If the
+// format. The format may change, so callers should not depend on it. If the
 // `verbose` flag is enabled, a stack frame will contain a fully qualified
-// function name and a full path (e.g.,
-// "path/to/pkg.Func@/path/to/format.go:123").
-// Otherwise, a stack frame will contain short names (e.g.,
-// "Func@format.go:123").
+// function name and a full path
+// (e.g., "path/to/pkg.Func@/path/to/format.go:123").
+// Otherwise, a stack frame will contain short names
+// (e.g., "Func@format.go:123").
 func ToString(s *stpb.StackTrace, verbose bool) string {
-	// If no frames exist, returns "No stack trace" for better readability.
+	// If no frames exist, return "No stack trace" for better readability.
 	if len(s.GetFrames()) == 0 {
 		return "No stack trace"
 	}
 
-	// Prepare a string builder because concatenating strings is inefficient.
+	// Use a string builder to concatenate strings efficiently.
 	var w strings.Builder
 
 	// Append a stack trace heading.
@@ -30,10 +30,10 @@ func ToString(s *stpb.StackTrace, verbose bool) string {
 
 	// Append all frames in a human-readable format.
 	for _, frame := range s.GetFrames() {
-		// Make every stack frame have an indent of two spaces.
+		// Indent each stack frame by two spaces.
 		w.WriteString("\n  ")
 
-		// Append a function name.
+		// Append the function name.
 		if verbose {
 			w.WriteString(frame.GetFunction())
 		} else {
@@ -41,21 +41,23 @@ func ToString(s *stpb.StackTrace, verbose bool) string {
 			w.WriteString(frame.GetFunction()[p+1:])
 		}
 
-		// Append a separator between a function name and a file name.
+		// Append a separator between the function name and the file name.
 		w.WriteString("@")
 
-		// Append a file name (verbose=false) or a full path (verbose=false).
+		// Append the file name (verbose=false) or the full path
+		// (verbose=false).
 		if verbose {
 			w.WriteString(frame.GetFile())
 		} else {
 			w.WriteString(path.Base(frame.GetFile()))
 		}
 
-		// Append a line number.
+		// Append the line number.
 		w.WriteString(":")
 		w.WriteString(strconv.Itoa(int(frame.GetLine())))
 
-		// Append a program counter.
+		// Append the program counter if verbose=true and program counter is
+		// not 0.
 		if verbose && frame.GetProgramCounter() != 0 {
 			w.WriteString("(")
 
@@ -68,6 +70,6 @@ func ToString(s *stpb.StackTrace, verbose bool) string {
 		}
 	}
 
-	// Build a string and returns it.
+	// Build the string and return it.
 	return w.String()
 }
