@@ -34,8 +34,12 @@ func ToString(s *stpb.StackTrace, verbose bool) string {
 
 		// Append the function name.
 		if verbose {
+			// If verbose flag is enabled, append the fully qualified function
+			// name.
 			w.WriteString(frame.GetFunction())
 		} else {
+			// If verbose flag is not enabled, append the short name by getting
+			// the string after the last slash in the function name.
 			p := strings.LastIndex(frame.GetFunction(), "/")
 			w.WriteString(frame.GetFunction()[p+1:])
 		}
@@ -46,8 +50,11 @@ func ToString(s *stpb.StackTrace, verbose bool) string {
 		// Append the file name (verbose=false) or the full path
 		// (verbose=true).
 		if verbose {
+			// If verbose flag is enabled, append the full path of the file.
 			w.WriteString(frame.GetFile())
 		} else {
+			// If verbose flag is not enabled, append the base name of the
+			// file.
 			w.WriteString(path.Base(frame.GetFile()))
 		}
 
