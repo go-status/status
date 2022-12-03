@@ -9,18 +9,23 @@ import (
 	"github.com/pkg/errors"
 )
 
+// TestNew tests the functionality of New.
 func TestNew(t *testing.T) {
+	// Allow the test to be run in parallel with other tests.
 	t.Parallel()
 
+	// Create two StackTrace objects with different depths.
 	a := recursiveCall(5)
 	b := recursiveCall(10)
 
+	// Check if the difference in depths is as expected.
 	if len(b.pcs)-len(a.pcs) != 5 {
 		t.Fatalf(
 			"Unexpected depths of stack traces: %d and %d",
 			len(a.pcs), len(b.pcs))
 	}
 
+	// Iterate over all the program counters.
 	for i := range a.pcs {
 		switch {
 		case i < 6:
@@ -55,6 +60,7 @@ func TestNew(t *testing.T) {
 	}
 }
 
+// TestStackTrace_ToProto tests ToProto generates an expected frame.
 func TestStackTrace_ToProto(t *testing.T) {
 	t.Parallel()
 
@@ -77,6 +83,8 @@ func TestStackTrace_ToProto(t *testing.T) {
 	}
 }
 
+// recursiveCall is a helper function that creates a new StackTrace object by
+// calling the New() function recursively until the specified depth is reached.
 func recursiveCall(depth int) StackTrace {
 	if depth <= 0 {
 		return New(context.Background())
@@ -85,6 +93,8 @@ func recursiveCall(depth int) StackTrace {
 	return recursiveCall(depth - 1)
 }
 
+// BenchmarkNew_Baseline benchmarks the performance of the errors.WithStack
+// function of pkg/errors package.
 func BenchmarkNew_Baseline(b *testing.B) {
 	b.ResetTimer()
 
