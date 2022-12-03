@@ -4,7 +4,7 @@
 package status
 
 // Status is an error interface that contains an error code, error message,
-// and stack trace.   It can also have an error chain.  In addition, it
+// and stack trace.  It can also have an error chain. In addition, it
 // implements the built-in error interface so that it can be down-casted to
 // an error type.  A nil value of Status represents a non-error (i.e. OK in the
 // gRPC context).
