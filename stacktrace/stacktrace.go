@@ -11,12 +11,12 @@ import (
 
 // StackTrace stores a stack trace with little overhead.
 type StackTrace struct {
-	// A stack trace converted from a Protocol Buffers message.
+	// proto is a stack trace converted from a Protocol Buffers message.
 	// CAVEAT: If proto is not nil, prev must be nil because proto should
 	// squash stack frames.
 	proto *stpb.StackTrace
 
-	// A stack trace generated internally.
+	// pcs is a stack trace generated internally.
 	// CAVEAT: The program counters are incremented by one due to the spec of
 	// runtime.Callers.  Please do not depend on the implementation.
 	pcs []uintptr
@@ -79,6 +79,7 @@ func (s *StackTrace) ToProto() *stpb.StackTrace {
 // names).
 func (s *StackTrace) appendTo(st *stpb.StackTrace) {
 	if s.proto != nil {
+		// Append the frames from the proto message to the result.
 		st.Frames = append(st.GetFrames(), s.proto.GetFrames()...)
 
 		return
@@ -131,23 +132,28 @@ func (s *StackTrace) appendTo(st *stpb.StackTrace) {
 	}
 }
 
-// Format implements fmt.Formatter.  It outputs a stack trace in a
-// human-readable format using ToString. The format may change, so callers must
-// not depend on it.  "%s" outputs the stack trace in a short format, and "%v"
-// outputs the stack trace in a long format.
+// Format implements fmt.Formatter.
+// It outputs a stack trace in a human-readable format using ToString. The
+// format may change, so callers must not depend on it.  "%s" outputs the
+// stack trace in a short format, and "%v" outputs the stack trace in a long
+// format.
 func (s *StackTrace) Format(f fmt.State, verb rune) {
 	switch verb {
 	case 's':
+		// Write the short format stack trace to the output.
 		_, _ = io.WriteString(f, ToString(s.ToProto(), false))
 	case 'v':
+		// Write the long format stack trace to the output.
 		_, _ = io.WriteString(f, ToString(s.ToProto(), true))
 	default:
+		// Write an error message for unsupported formats.
 		_, _ = io.WriteString(f, fmt.Sprintf("%%!%c(StackTrace)", verb))
 	}
 }
 
-// String implements fmt.Stringer.  It returns the same format as ToString
-// returns where verbose is set to false.
+// String implements fmt.Stringer.
+// It returns the same format as ToString returns where verbose is set to
+// false.
 func (s *StackTrace) String() string {
 	return ToString(s.ToProto(), false)
 }
