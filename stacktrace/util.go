@@ -73,6 +73,8 @@ func (b *toStringBuilder) appendStackFrame(f *stpb.StackTrace_Frame) {
 	b.appendProgramCounter(f)
 }
 
+// appendFunctionName appends the function name for a stack frame to the
+// string builder.
 func (b *toStringBuilder) appendFunctionName(f *stpb.StackTrace_Frame) {
 	// Append the function name.
 	if b.Verbose {
@@ -87,6 +89,8 @@ func (b *toStringBuilder) appendFunctionName(f *stpb.StackTrace_Frame) {
 	}
 }
 
+// appendFileName appends the file name (Verbose=false) or the full path
+// (Verbose=true) for a stack frame to the string builder.
 func (b *toStringBuilder) appendFileName(f *stpb.StackTrace_Frame) {
 	// Append the file name (verbose=false) or the full path
 	// (verbose=true).
@@ -100,6 +104,9 @@ func (b *toStringBuilder) appendFileName(f *stpb.StackTrace_Frame) {
 	}
 }
 
+// appendProgramCounter appends the program counter for a stack frame to the
+// string builder.  The program counter will only be appended if the `Verbose`
+// flag is enabled and the program counter is not 0.
 func (b *toStringBuilder) appendProgramCounter(f *stpb.StackTrace_Frame) {
 	// Append the program counter if verbose=true and program counter is
 	// not 0.
