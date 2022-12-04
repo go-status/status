@@ -21,61 +21,86 @@ func ToString(s *stpb.StackTrace, verbose bool) string {
 		return "No stack trace"
 	}
 
-	// Use a string builder to concatenate strings efficiently.
-	var w strings.Builder
+	b := toStringBuilder{Verbose: verbose}
 
 	// Append a stack trace heading.
-	w.WriteString("Stack trace:")
+	b.WriteString("Stack trace:")
 
 	// Append all frames in a human-readable format.
-	for _, frame := range s.GetFrames() {
-		// Indent each stack frame by two spaces.
-		w.WriteString("\n  ")
-
-		// Append the function name.
-		if verbose {
-			// If verbose flag is enabled, append the fully qualified function
-			// name.
-			w.WriteString(frame.GetFunction())
-		} else {
-			// If verbose flag is not enabled, append the short name by getting
-			// the string after the last slash in the function name.
-			p := strings.LastIndex(frame.GetFunction(), "/")
-			w.WriteString(frame.GetFunction()[p+1:])
-		}
-
-		// Append a separator between the function name and the file name.
-		w.WriteString("@")
-
-		// Append the file name (verbose=false) or the full path
-		// (verbose=true).
-		if verbose {
-			// If verbose flag is enabled, append the full path of the file.
-			w.WriteString(frame.GetFile())
-		} else {
-			// If verbose flag is not enabled, append the base name of the
-			// file.
-			w.WriteString(path.Base(frame.GetFile()))
-		}
-
-		// Append the line number.
-		w.WriteString(":")
-		w.WriteString(strconv.Itoa(int(frame.GetLine())))
-
-		// Append the program counter if verbose=true and program counter is
-		// not 0.
-		if verbose && frame.GetProgramCounter() != 0 {
-			w.WriteString("(")
-
-			if frame.GetEntry() != 0 {
-				w.WriteString(fmt.Sprintf("0x%x+", frame.GetEntry()))
-			}
-
-			w.WriteString(fmt.Sprintf(
-				"0x%x)", frame.GetProgramCounter()-frame.GetEntry()))
-		}
+	for _, f := range s.GetFrames() {
+		b.appendStackFrame(f)
 	}
 
 	// Build the string and return it.
-	return w.String()
+	return b.String()
+}
+
+type toStringBuilder struct {
+	strings.Builder
+
+	Verbose bool
+}
+
+func (b *toStringBuilder) appendStackFrame(f *stpb.StackTrace_Frame) {
+	// Indent each stack frame by two spaces.
+	b.WriteString("\n  ")
+
+	// Append the function name.
+	b.appendFunctionName(f)
+
+	// Append a separator between the function name and the file name.
+	b.WriteString("@")
+
+	// Append the file name (verbose=false) or the full path
+	// (verbose=true).
+	b.appendFileName(f)
+
+	// Append the line number.
+	b.WriteString(":")
+	b.WriteString(strconv.Itoa(int(f.GetLine())))
+
+	// Append the program counter.
+	b.appendProgramCounter(f)
+}
+
+func (b *toStringBuilder) appendFunctionName(f *stpb.StackTrace_Frame) {
+	// Append the function name.
+	if b.Verbose {
+		// If verbose flag is enabled, append the fully qualified function
+		// name.
+		b.WriteString(f.GetFunction())
+	} else {
+		// If verbose flag is not enabled, append the short name by getting
+		// the string after the last slash in the function name.
+		p := strings.LastIndex(f.GetFunction(), "/")
+		b.WriteString(f.GetFunction()[p+1:])
+	}
+}
+
+func (b *toStringBuilder) appendFileName(f *stpb.StackTrace_Frame) {
+	// Append the file name (verbose=false) or the full path
+	// (verbose=true).
+	if b.Verbose {
+		// If verbose flag is enabled, append the full path of the file.
+		b.WriteString(f.GetFile())
+	} else {
+		// If verbose flag is not enabled, append the base name of the
+		// file.
+		b.WriteString(path.Base(f.GetFile()))
+	}
+}
+
+func (b *toStringBuilder) appendProgramCounter(f *stpb.StackTrace_Frame) {
+	// Append the program counter if verbose=true and program counter is
+	// not 0.
+	if b.Verbose && f.GetProgramCounter() != 0 {
+		b.WriteString("(")
+
+		if f.GetEntry() != 0 {
+			b.WriteString(fmt.Sprintf("0x%x+", f.GetEntry()))
+		}
+
+		b.WriteString(fmt.Sprintf(
+			"0x%x)", f.GetProgramCounter()-f.GetEntry()))
+	}
 }
