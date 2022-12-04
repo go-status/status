@@ -38,6 +38,8 @@ func ToString(s *stpb.StackTrace, verbose bool) string {
 	return b.String()
 }
 
+// toStringBuilder is a string builder that is used to build a human-readable
+// string representing a stack trace.
 type toStringBuilder struct {
 	strings.Builder
 
