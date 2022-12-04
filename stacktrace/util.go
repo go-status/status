@@ -41,9 +41,14 @@ func ToString(s *stpb.StackTrace, verbose bool) string {
 type toStringBuilder struct {
 	strings.Builder
 
+	// Verbose indicates whether the stack trace string should include
+	// more detailed information such as fully qualified function names and
+	// full file paths.
 	Verbose bool
 }
 
+// appendStackFrame appends a single stack frame to the string builder in a
+// human-readable format.
 func (b *toStringBuilder) appendStackFrame(f *stpb.StackTrace_Frame) {
 	// Indent each stack frame by two spaces.
 	b.WriteString("\n  ")
