@@ -16,22 +16,25 @@ import (
 // Otherwise, a stack frame will include short names (e.g.,
 // "Func@format.go:123").
 func ToString(s *stpb.StackTrace, verbose bool) string {
-	// If there are no frames, return "No stack trace" for better readability.
+	// If there are no frames in the stack trace, return "No stack trace" for
+	// better readability.
 	if len(s.GetFrames()) == 0 {
 		return "No stack trace"
 	}
 
+	// Create a new string builder and set its verbosity.
 	b := toStringBuilder{Verbose: verbose}
 
-	// Append a stack trace heading.
+	// Append a stack trace heading to the string builder.
 	b.WriteString("Stack trace:")
 
-	// Append all frames in a human-readable format.
+	// Iterate over all frames in the stack trace and append them to the string
+	// builder in a human-readable format.
 	for _, f := range s.GetFrames() {
 		b.appendStackFrame(f)
 	}
 
-	// Build the string and return it.
+	// Build the final string and return it.
 	return b.String()
 }
 
