@@ -9,16 +9,19 @@ import (
 	stpb "github.com/go-status/status/proto"
 )
 
-// ToString returns a human-readable string representing the stack trace.
-// The format may change, so callers should not rely on it. If the `verbose`
-// flag is enabled, a stack frame will include a fully qualified function
-// name and a full path (e.g., "path/to/pkg.Func@/path/to/format.go:123").
-// Otherwise, a stack frame will include short names (e.g.,
-// "Func@format.go:123").
+// ToString returns a human-readable string representation of the provided
+// stack trace.  The format of the string may change, so callers should not
+// rely on it.  If the `verbose` flag is enabled, a stack frame will include
+// a fully qualified function name and a full path (e.g.,
+// "path/to/pkg.Func@/path/to/format.go:123").  Otherwise, a stack frame will
+// include short names (e.g., "Func@format.go:123").  If the provided stack
+// trace does not have any frames, the returned string will be
+// "No stack trace".
 func ToString(s *stpb.StackTrace, verbose bool) string {
-	// If there are no frames in the stack trace, return "No stack trace" for
-	// better readability.
+	// Check if the provided stack trace has any frames.
 	if len(s.GetFrames()) == 0 {
+		// If there are no frames in the stack trace, return "No stack trace"
+		// for better readability.
 		return "No stack trace"
 	}
 
@@ -38,8 +41,8 @@ func ToString(s *stpb.StackTrace, verbose bool) string {
 	return b.String()
 }
 
-// toStringBuilder is a string builder that is used to build a human-readable
-// string representing a stack trace.
+// toStringBuilder is a struct that is used to build a human-readable string
+// representing a stack trace.
 type toStringBuilder struct {
 	strings.Builder
 
@@ -69,7 +72,7 @@ func (b *toStringBuilder) appendStackFrame(f *stpb.StackTrace_Frame) {
 	b.WriteString(":")
 	b.WriteString(strconv.Itoa(int(f.GetLine())))
 
-	// Append the program counter.
+	// Append the program counter (if available).
 	b.appendProgramCounter(f)
 }
 
