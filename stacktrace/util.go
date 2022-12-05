@@ -18,10 +18,9 @@ import (
 // trace does not have any frames, the returned string will be
 // "No stack trace".
 func ToString(s *stpb.StackTrace, verbose bool) string {
-	// Check if the provided stack trace has any frames.
+	// If there are no frames in the stack trace, return "No stack trace" for
+	// better readability.
 	if len(s.GetFrames()) == 0 {
-		// If there are no frames in the stack trace, return "No stack trace"
-		// for better readability.
 		return "No stack trace"
 	}
 
