@@ -21,7 +21,7 @@ func TestGo(t *testing.T) {
 	// Run the Go function with a function that creates a new stack trace and
 	// sets it to the st variable.
 	Go(context.Background(), func(ctx context.Context) {
-		tmpSt := New(ctx)
+		tmpSt := New(ctx, 0)
 		st = &tmpSt
 		wg.Done()
 	})
