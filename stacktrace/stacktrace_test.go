@@ -64,7 +64,7 @@ func TestNew(t *testing.T) {
 func TestStackTrace_ToProto(t *testing.T) {
 	t.Parallel()
 
-	st := New(context.Background())
+	st := New(context.Background(), 0)
 	s := st.ToProto()
 	_, file, line, _ := runtime.Caller(0)
 
@@ -87,7 +87,7 @@ func TestStackTrace_ToProto(t *testing.T) {
 // calling the New() function recursively until the specified depth is reached.
 func recursiveCall(depth int) StackTrace {
 	if depth <= 0 {
-		return New(context.Background())
+		return New(context.Background(), 0)
 	}
 
 	return recursiveCall(depth - 1)
@@ -111,7 +111,7 @@ func BenchmarkNew(b *testing.B) {
 	ctx := context.Background()
 
 	for i := 0; i < b.N; i++ {
-		New(ctx)
+		New(ctx, 0)
 	}
 }
 

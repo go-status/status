@@ -33,8 +33,9 @@ var (
 )
 
 // New returns the current stack trace.  The first stack frame in the returned
-// StackTrace should identify the caller of this function.
-func New(ctx context.Context) StackTrace {
+// StackTrace should identify the caller of this function.  skip specifies the
+// number of stack frames to skip before starting to record the stack trace.
+func New(ctx context.Context, skip int) StackTrace {
 	result := StackTrace{prev: fromContext(ctx)}
 
 	// NOTE: `buf` uses a constant size to avoid heap allocation.
@@ -42,9 +43,9 @@ func New(ctx context.Context) StackTrace {
 
 	// NOTE: This for loop starts with a skip count of 2, to ignore the frames
 	// for this function and runtime.Callers.
-	for skip := 2; ; skip += len(buf) {
+	for s := skip + 2; ; s += len(buf) {
 		// Fetch the callers and resize the pcs field in the result.
-		pcs := buf[:runtime.Callers(skip, buf[:])]
+		pcs := buf[:runtime.Callers(s, buf[:])]
 		// Append the callers to the result.
 		result.pcs = append(result.pcs, pcs...)
 

@@ -57,7 +57,7 @@ func goEnter(f func()) {
 //go:noinline
 func goExit(ctx context.Context) *StackTrace {
 	// Create a new stack trace with the given context.
-	st := New(ctx)
+	st := New(ctx, 0)
 
 	// Return the new stack trace.
 	return &st
